@@ -1,0 +1,86 @@
+---
+title: "OSW ggplot2 exercise"
+author: "T Haarman"
+date: "6/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Intro
+This exercise leaves you free to create whatever you want. Dataviz is a creative process, so I won't tell you exactly what to do, just experiment with the package freely. To guide you I provided a small but interesting dataset about Dutch weather measurements, and some starter code to transform the data and get you started.
+
+Examples of things you can visualize:
+  - Is it getting hotter in The Netherlands?
+  - 2020 was one of the hottest years ever in The Netherlands, does the data also show this? 
+  - 2018 was on of the driest years ever, can you visualize this?
+
+But feel free to do whatever you can think of. Good luck!
+
+## Data
+The csv file `knmi_data.csv` contains daily measurements from 1906 to 2021 of KNMI's main measuring station at De Bilt, Utrecht. The data features are as follows:
+
+date:         Day of the measurement, ranging from 1906-01-01 to 2021-05-29.
+mean_temp:    Mean temperature of the day, in degrees Celsius.
+max_temp:     Maximum temperature of the day, in degrees Celsius.
+min_temp:     Minimum temperature of the day, in degrees Celsius.
+rainfall:     Total rainfall of the day, in mm.
+
+
+
+## Starting code
+Here are the libraries you will need (all part of the tidyverse):
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(lubridate)
+```
+
+Now let's load the data:
+
+```{r}
+weather <- read_csv('knmi_data.csv')
+```
+
+If you get a 'No such file or directory' error: Navigate to the folder where the data file is in the 'files' tab, which should be in the bottom right panel of Rstudio by default. Once you're in the right directory, click 'More -> Set As Working directory' and try again.
+
+
+Now create a smaller, yearly dataset that has the average temperatures and total rainfall per year. This is easier to work with for some simple plots. We also remove the data for 2021, as it obviously is incomplete.
+
+```{r}
+weather_yearly <- weather %>% 
+  mutate('year' = year(date)) %>%
+  filter(year != 2021) %>% 
+  group_by(year) %>% 
+  summarise(mean_temp = mean(mean_temp),
+            min_temp = mean(min_temp),
+            max_temp = mean(max_temp),
+            rainfall = sum(rainfall),
+            .groups = 'drop_last')
+
+head(weather_yearly)
+```
+
+
+## Now it's your turn!
+
+Try to think of what you want to show! As an example, you can try to make a line graph of the mean temperatures per year. Fill in the blanks. As a reminder, the columns you can use here are: `year`, `mean_temp`, `max_temp` and `rainfall`.
+
+```{r}
+ggplot(weather_yearly, aes(x = ...,
+                           y = ...)) +
+  geom_...()
+```
+
+
+Experiment! See what you can create. Maybe you want to use points instead of lines, create a bar graph (hint: you need geom_col for this), or if you're more advanced try doing something cool with the daily data.
+
+```{r}
+
+```
+
+

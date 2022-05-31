@@ -1,0 +1,195 @@
+---
+title: "OSW_ggplot"
+author: "T Haarman"
+date: "5/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## OSW ggplot2
+
+This R markdown documents contains examples of basic functions in ggplot2. In the workshop we will go through these examples to showcase the package. 
+
+First we load the ggplot2 package.
+
+```{r}
+library(ggplot2)
+```
+
+
+
+## Simple scatterplot
+
+Look at the data:
+
+```{r}
+mpg
+```
+
+Let's:
+  1. create a basic scatterplot
+  2. show the different car drives by colour/shape
+  3. show the displacement values in the plot
+  4. make the points a solid color
+  5. add more geometries to the plot like a smoothed line or density layer
+
+```{r}
+ggplot(mpg, aes(x=cty, y=hwy)) +
+  geom_point()
+
+```
+
+It matters where you put the mappings (and data)!
+
+```{r}
+ggplot(mpg, aes(x=hwy, y=cty, colour=drv)) +
+  geom_point() +
+  geom_smooth(method='lm')
+```
+
+
+
+## Let's look at some more geoms!
+
+diamonds dataset:
+```{r}
+diamonds
+```
+
+
+Lets look at the distribution of a single variable (price)
+```{r}
+# Histogram
+ggplot(diamonds, aes(x = price)) +
+  geom_histogram()
+
+# Area
+# ggplot(diamonds, aes(x = price, fill=cut)) +
+#   geom_area(stat="bin", bins=100)
+
+# Density (kernel estimation)
+# ggplot(diamonds, aes(x = price)) +
+#   geom_density()
+
+```
+
+
+
+
+Now visualize two variables (carat vs price)
+```{r}
+ggplot(diamonds, aes(x = carat, 
+                     y = price, 
+                     colour = cut)) +
+geom_point(alpha=0.1)  
+# geom_rug() 
+# geom_smooth()
+
+```
+
+With one categorical value: Box/violinplot
+```{r}
+
+ggplot(diamonds, aes(x = price, y = cut)) +
+  geom_boxplot()
+  # geom_violin()
+```
+
+Counts, with bar charts. We can fill it with the clarity to get a stacked bar chart.
+
+```{r}
+ggplot(diamonds, aes(x = cut)) +
+  geom_bar()
+```
+
+But what if we already have the counts?
+```{r}
+#This is the same, but with precalculated counts
+diamonds_counts <- diamonds %>% 
+  group_by(cut) %>% 
+  summarise(count = n())
+
+ggplot(diamonds_counts, aes(x=cut, y=count)) +
+  geom_bar(stat='identity')
+
+# geom_col() is a shortcut for geom_bar(stat='identity')
+ggplot(diamonds_counts, aes(x=cut, y=count)) +
+  geom_col()
+
+```
+
+## Time series/line plots
+
+You may need to do some data transformation on time series data to show what you want.
+```{r}
+eu_stocks <- data.frame(EuStockMarkets, date=time(EuStockMarkets))
+eu_stocks_long <- eu_stocks %>% 
+  pivot_longer(cols=c("DAX", "SMI", "CAC", "FTSE"))
+
+
+ggplot(eu_stocks_long, aes(x = date, 
+                           y = value,
+                           color = name)) +
+  geom_line()
+```
+
+
+
+## Scales
+```{r}
+ggplot(diamonds, aes(x = carat, 
+                     y = price, 
+                     colour = clarity)) +
+  geom_point() +
+  scale_colour_brewer(type='seq') +
+  scale_x_continuous(trans="log10")
+
+```
+
+
+## Themes
+Many predefined themes (e.g. bw/classic/dark/minimal). You can also define your own theme, for example on EOS you have ggDNB::theme_dnb().
+```{r}
+ggplot(mpg, aes(x = cty, 
+                y = hwy, 
+                colour = class)) +
+  geom_point() +
+  theme_classic()
+```
+
+```{r}
+ggplot(mpg) + 
+  geom_bar(aes(y = class, fill = drv)) +
+  facet_grid(cols=vars(year)) +
+  theme_minimal() +
+  scale_fill_brewer(palette = 'Accent') +
+  labs(title = 'Number of Cars by Year',
+       caption = '© De Nederlandsche Bank',
+       x = NULL,
+       y = 'Car class',
+       fill = 'Drive type') +
+  theme(
+    title = element_text(family = 'sans', 
+                         face='italic', 
+                         color='darkgray'),
+    strip.text = element_text(face='bold', size=10),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.x = element_line(linetype = 'dashed')
+  )
+```
+
+```{r}
+ggplot(mpg, aes(x=cty, y=displ)) +
+  geom_point(aes(color=drv)) 
++
+  geom_text(data=filter(mpg, hwy > 40), aes(label=model))
+```
+
+
+
+
+
+
